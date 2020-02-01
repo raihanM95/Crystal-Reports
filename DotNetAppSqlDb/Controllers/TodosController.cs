@@ -9,6 +9,8 @@ using System.Web.Mvc;
 using DotNetAppSqlDb.Models;using System.Diagnostics;
 using CrystalDecisions.CrystalReports.Engine;
 using System.IO;
+using System.Data.SqlClient;
+using System.Configuration;
 
 namespace DotNetAppSqlDb.Controllers
 {
@@ -138,7 +140,7 @@ namespace DotNetAppSqlDb.Controllers
             base.Dispose(disposing);
         }
 
-        public ActionResult exportReport()
+        public ActionResult ExportReport()
         {
             ReportDocument rd = new ReportDocument();
             rd.Load(Path.Combine(Server.MapPath("~/Reports"), "CrystalReport.rpt"));
@@ -156,6 +158,24 @@ namespace DotNetAppSqlDb.Controllers
             {
                 throw;
             }
+        }
+
+        public ActionResult ExportSPReport()
+        {
+            ReportDocument rd = new ReportDocument();
+            rd.Load(Path.Combine(Server.MapPath("~/Report/CrystalReportSP.rpt")));
+            SqlConnection cn = new SqlConnection(ConfigurationManager.ConnectionStrings["MyDbConnection"].ToString());
+            SqlCommand cmd = new SqlCommand("SelectTodoesList", cn);
+            DataTable dt = new DataTable();
+            SqlDataAdapter sda = new SqlDataAdapter(cmd);
+            sda.Fill(dt);
+            rd.SetDataSource(dt);
+            Response.Buffer = false;
+            Response.ClearContent();
+            Response.ClearHeaders();
+            Stream str = rd.ExportToStream(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat);
+            str.Seek(0, SeekOrigin.Begin);
+            return File(str, "application/pdf", "Todoes_list.pdf");
         }
     }
 }
