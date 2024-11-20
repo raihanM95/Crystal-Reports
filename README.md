@@ -1,4 +1,4 @@
-# Crystal-Reports
+# Crystal Reports
 <p align="left">
   <br>
   <a href="https://github.com/raihanM95/Crystal-Reports">
